@@ -70,6 +70,8 @@ jobs:
           DATABASE_URL: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379/0
           PYTHONPATH: ${{ github.workspace }}
+          SECRET_KEY: test-secret-key-for-ci-only
+          CORS_ORIGINS: http://localhost:3000
 
       - name: Check coverage threshold
         run: |
