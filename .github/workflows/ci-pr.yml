@@ -1,0 +1,71 @@
+name: Pull Request CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    uses: ./.github/workflows/ci-code-quality.yml
+
+  testing:
+    name: Run Tests
+    uses: ./.github/workflows/ci-testing.yml
+
+  build:
+    name: Build Docker Image
+    uses: ./.github/workflows/ci-build.yml
+
+  pr-summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [code-quality, testing, build]
+    if: always()
+    steps:
+      - name: Check all jobs status
+        run: |
+          if [ "${{ needs.code-quality.result }}" != "success" ] || \
+             [ "${{ needs.testing.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ Some CI checks failed"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+          fi
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const results = {
+              'Code Quality': '${{ needs.code-quality.result }}',
+              'Testing': '${{ needs.testing.result }}',
+              'Build': '${{ needs.build.result }}'
+            };
+            
+            const getEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'cancelled': return '⚠️';
+                default: return '⏸️';
+              }
+            };
+            
+            let body = '## CI/CD Pipeline Results\n\n';
+            for (const [job, status] of Object.entries(results)) {
+              body += `${getEmoji(status)} **${job}**: ${status}\n`;
+            }
+            
+            body += '\n---\n';
+            body += `**Commit**: ${context.sha.substring(0, 7)}\n`;
+            body += `**Workflow Run**: [View Details](${context.payload.repository.html_url}/actions/runs/${context.runId})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
