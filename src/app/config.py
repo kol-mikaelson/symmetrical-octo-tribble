@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
     # API Configuration
-    api_host: str = Field(default="0.0.0.0", alias="API_HOST")
+    api_host: str = Field(default="0.0.0.0", alias="API_HOST")  # nosec B104
     api_port: int = Field(default=8000, alias="API_PORT")
     api_prefix: str = Field(default="/api", alias="API_PREFIX")
 
@@ -80,6 +80,8 @@ class Settings(BaseSettings):
     def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Parse CORS origins from comma-separated string or list."""
         if isinstance(v, str):
+            if not v or v.strip() == "":
+                return ["http://localhost:3000"]
             return [origin.strip() for origin in v.split(",")]
         return v
 

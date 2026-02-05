@@ -152,7 +152,7 @@ class AuthService:
         token_response = TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            token_type="bearer",
+            token_type="bearer",  # nosec B106
             expires_in=settings.jwt_access_token_expire_minutes * 60,
         )
 
@@ -200,7 +200,7 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,  # Return same refresh token
-            token_type="bearer",
+            token_type="bearer",  # nosec B106
             expires_in=settings.jwt_access_token_expire_minutes * 60,
         )
 
@@ -218,7 +218,7 @@ class AuthService:
         # Blacklist access token
         access_blacklist = TokenBlacklist(
             jti=access_payload["jti"],
-            token_type="access",
+            token_type="access",  # nosec B106
             expires_at=datetime.fromtimestamp(access_payload["exp"]),
         )
         self.db.add(access_blacklist)
@@ -226,7 +226,7 @@ class AuthService:
         # Blacklist refresh token
         refresh_blacklist = TokenBlacklist(
             jti=refresh_payload["jti"],
-            token_type="refresh",
+            token_type="refresh",  # nosec B106
             expires_at=datetime.fromtimestamp(refresh_payload["exp"]),
         )
         self.db.add(refresh_blacklist)
@@ -252,7 +252,7 @@ class AuthService:
         for session in sessions:
             blacklist = TokenBlacklist(
                 jti=session.refresh_token_jti,
-                token_type="refresh",
+                token_type="refresh",  # nosec B106
                 expires_at=session.expires_at,
             )
             self.db.add(blacklist)

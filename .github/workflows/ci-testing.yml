@@ -69,6 +69,8 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
           PYTHONPATH: ${{ github.workspace }}
+          SECRET_KEY: test-secret-key-for-ci-only
+          CORS_ORIGINS: http://localhost:3000
 
       - name: Run tests with coverage
         run: pytest --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing
