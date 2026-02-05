@@ -1,14 +1,15 @@
 """Comment service for business logic."""
+
 import uuid
-from typing import List, Tuple
-from sqlalchemy import select, func
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from src.app.exceptions import NotFoundError
 from src.models.comment import Comment
 from src.models.user import User
 from src.schemas.comment import CommentCreate, CommentUpdate
-from src.app.exceptions import NotFoundError
 
 
 class CommentService:
@@ -76,7 +77,7 @@ class CommentService:
         issue_id: uuid.UUID,
         page: int = 1,
         limit: int = 20,
-    ) -> Tuple[List[Comment], int]:
+    ) -> tuple[list[Comment], int]:
         """List comments for an issue with pagination.
 
         Args:
@@ -110,9 +111,7 @@ class CommentService:
 
         return list(comments), total
 
-    async def update_comment(
-        self, comment_id: uuid.UUID, comment_data: CommentUpdate
-    ) -> Comment:
+    async def update_comment(self, comment_id: uuid.UUID, comment_data: CommentUpdate) -> Comment:
         """Update a comment.
 
         Args:

@@ -1,21 +1,22 @@
 """Main FastAPI application."""
+
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
-from fastapi import FastAPI, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from datetime import datetime
 
-from src.app.config import settings
-from src.app.exceptions import APIException
-from src.database.database import init_db, close_db
-from src.app.dependencies import close_redis
-from src.routers import auth, projects, issues, comments
-from src.schemas.common import HealthResponse, ErrorResponse, ErrorDetail
-from src.utils.security import generate_request_id
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from src.app.config import settings
+from src.app.dependencies import close_redis
+from src.app.exceptions import APIException
+from src.database.database import close_db, init_db
+from src.routers import auth, comments, issues, projects
+from src.schemas.common import ErrorDetail, ErrorResponse, HealthResponse
+from src.utils.security import generate_request_id
 
 # Configure logging
 logging.basicConfig(

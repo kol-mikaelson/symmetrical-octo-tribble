@@ -1,28 +1,28 @@
 """Projects router for CRUD operations."""
-import uuid
-from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
-from math import ceil
 
-from src.schemas.project import (
-    ProjectCreate,
-    ProjectUpdate,
-    ProjectResponse,
-    ProjectListResponse,
-)
-from src.services.project_service import ProjectService
-from src.services.permission_service import PermissionService
-from src.services.audit_service import AuditService
-from src.models.user import User, UserRole
-from src.app.dependencies import (
-    get_current_active_user,
-    get_client_ip,
-    require_role,
-)
-from src.app.config import settings
-from src.database.database import get_db
+import uuid
+from math import ceil
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.app.dependencies import (
+    get_client_ip,
+    get_current_active_user,
+    require_role,
+)
+from src.database.database import get_db
+from src.models.user import User, UserRole
+from src.schemas.project import (
+    ProjectCreate,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectUpdate,
+)
+from src.services.audit_service import AuditService
+from src.services.permission_service import PermissionService
+from src.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -201,9 +201,7 @@ async def update_project(
         Updated project
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "edit_project", project_id
-    )
+    await permission_service.require_permission(current_user, "edit_project", project_id)
 
     # Get old project for audit
     old_project = await project_service.get_project(project_id)
@@ -252,9 +250,7 @@ async def archive_project(
         audit_service: Audit service
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "archive_project", project_id
-    )
+    await permission_service.require_permission(current_user, "archive_project", project_id)
 
     # Archive project
     project = await project_service.archive_project(project_id)

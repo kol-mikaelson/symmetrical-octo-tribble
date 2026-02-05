@@ -1,6 +1,8 @@
 """Common schemas for error responses and pagination."""
-from typing import Any, Dict, List, Optional
+
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -16,7 +18,7 @@ class ErrorResponse(BaseModel):
 
     code: str = Field(..., description="Error code")
     message: str = Field(..., description="Human-readable error message")
-    details: List[ErrorDetail] = Field(default_factory=list, description="Error details")
+    details: list[ErrorDetail] = Field(default_factory=list, description="Error details")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
     request_id: Optional[str] = Field(None, description="Request ID for tracking")
 

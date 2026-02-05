@@ -1,8 +1,10 @@
 """User session model for tracking active sessions."""
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy import String, DateTime, ForeignKey
+
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
@@ -17,9 +19,7 @@ class UserSession(Base):
     __tablename__ = "user_sessions"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # User Reference
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -45,9 +45,7 @@ class UserSession(Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(
-        "User", back_populates="sessions"
-    )
+    user: Mapped["User"] = relationship("User", back_populates="sessions")
 
     def __repr__(self) -> str:
         """String representation of UserSession."""

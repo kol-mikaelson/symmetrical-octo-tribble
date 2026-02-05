@@ -1,23 +1,24 @@
 """Comments router for CRUD operations."""
+
 import uuid
-from fastapi import APIRouter, Depends, Query, status
 from math import ceil
 
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.app.dependencies import get_client_ip, get_current_active_user
+from src.database.database import get_db
+from src.models.user import User
 from src.schemas.comment import (
     CommentCreate,
-    CommentUpdate,
-    CommentResponse,
     CommentListResponse,
+    CommentResponse,
+    CommentUpdate,
 )
+from src.services.audit_service import AuditService
 from src.services.comment_service import CommentService
 from src.services.issue_service import IssueService
 from src.services.permission_service import PermissionService
-from src.services.audit_service import AuditService
-from src.models.user import User
-from src.app.dependencies import get_current_active_user, get_client_ip
-from src.database.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
-
 
 router = APIRouter(prefix="/issues/{issue_id}/comments", tags=["Comments"])
 comments_router = APIRouter(prefix="/comments", tags=["Comments"])
@@ -168,9 +169,7 @@ async def update_comment(
         Updated comment
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "edit_comment", comment_id
-    )
+    await permission_service.require_permission(current_user, "edit_comment", comment_id)
 
     # Get old comment for audit
     old_comment = await comment_service.get_comment(comment_id)

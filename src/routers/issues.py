@@ -1,25 +1,26 @@
 """Issues router for CRUD operations."""
-import uuid
-from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
-from math import ceil
 
-from src.schemas.issue import (
-    IssueCreate,
-    IssueUpdate,
-    IssueResponse,
-    IssueListResponse,
-)
-from src.models.issue import IssueStatus, IssuePriority
-from src.services.issue_service import IssueService
-from src.services.project_service import ProjectService
-from src.services.permission_service import PermissionService
-from src.services.audit_service import AuditService
-from src.models.user import User
-from src.app.dependencies import get_current_active_user, get_client_ip
-from src.database.database import get_db
+import uuid
+from math import ceil
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.app.dependencies import get_client_ip, get_current_active_user
+from src.database.database import get_db
+from src.models.issue import IssuePriority, IssueStatus
+from src.models.user import User
+from src.schemas.issue import (
+    IssueCreate,
+    IssueListResponse,
+    IssueResponse,
+    IssueUpdate,
+)
+from src.services.audit_service import AuditService
+from src.services.issue_service import IssueService
+from src.services.permission_service import PermissionService
+from src.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects/{project_id}/issues", tags=["Issues"])
 issues_router = APIRouter(prefix="/issues", tags=["Issues"])

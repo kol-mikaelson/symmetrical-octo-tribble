@@ -10,16 +10,17 @@ Production-ready Bug Reporting System API built with FastAPI, PostgreSQL, and Re
 
 ## Features
 
-- ✅ **RESTful API** with FastAPI and automatic OpenAPI documentation
-- ✅ **Authentication & Authorization** with RS256 JWT tokens and RBAC
-- ✅ **Database** with PostgreSQL 15, async SQLAlchemy, and Alembic migrations
-- ✅ **Caching & Sessions** with Redis
-- ✅ **Security** with bcrypt password hashing, rate limiting, and account lockout
-- ✅ **Audit Logging** for all sensitive operations
-- ✅ **State Machine** for issue status transitions with validation
-- ✅ **Containerization** with Docker and Docker Compose
-- ✅ **Kubernetes** ready with manifests and HPA
-- ✅ **API Documentation** at `/docs` (Swagger UI) and `/redoc`
+-  **RESTful API** with FastAPI and automatic OpenAPI documentation
+-  **Authentication & Authorization** with RS256 JWT tokens and RBAC
+-  **Database** with PostgreSQL 15, async SQLAlchemy, and Alembic migrations
+-  **Caching & Sessions** with Redis
+-  **Security** with bcrypt password hashing, rate limiting, and account lockout
+-  **Audit Logging** for all sensitive operations
+-  **State Machine** for issue status transitions with validation
+-  **Containerization** with Docker and Docker Compose
+-  **Kubernetes** ready with manifests and HPA
+-  **CI/CD Pipeline** with GitHub Actions (code quality, testing, build, deploy)
+-  **API Documentation** at `/docs` (Swagger UI) and `/redoc`
 
 ## Quick Start
 
@@ -247,35 +248,78 @@ See `.env.example` for all available configuration options.
 - `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` - Access token expiry (default: 15)
 - `JWT_REFRESH_TOKEN_EXPIRE_DAYS` - Refresh token expiry (default: 7)
 
-## Testing
+
+## CI/CD Pipeline
+
+The project includes a comprehensive GitHub Actions CI/CD pipeline with four stages:
+
+### Pipeline Stages
+
+1. **Code Quality** (`ci-code-quality.yml`)
+   - Linting with Ruff
+   - Code formatting with Black
+   - Type checking with MyPy
+   - Security scanning with Bandit, pip-audit, and Safety
+
+2. **Testing** (`ci-testing.yml`)
+   - Unit and integration tests with pytest
+   - Code coverage reporting (≥70% required)
+   - PostgreSQL and Redis service containers
+   - Coverage reports uploaded as artifacts
+
+3. **Build & Scan** (`ci-build.yml`)
+   - Multi-stage Docker image build
+   - Trivy vulnerability scanning
+   - Image push to GitHub Container Registry
+   - Security reports uploaded to GitHub Security tab
+
+4. **Deploy** (`ci-deploy.yml`)
+   - Kubernetes deployment to staging/production
+   - Automated rollout with health checks
+   - Smoke tests post-deployment
+   - Automatic rollback on failure
+
+### Workflow Triggers
+
+- **Push to main/develop**: Runs all stages
+- **Pull Requests**: Runs code quality, testing, and build (without push)
+- **Manual Dispatch**: Deploy workflow can be triggered manually
+- **Tag Push**: Triggers versioned releases
+
+### Required Secrets
+
+Configure these secrets in your GitHub repository settings:
+
+- `GITHUB_TOKEN` - Automatically provided by GitHub
+- `KUBE_CONFIG` - Base64-encoded Kubernetes config (for deployment)
+- `DATABASE_URL` - Production database connection string
+- `REDIS_URL` - Production Redis connection string
+- `SECRET_KEY` - Application secret key
+- `SLACK_WEBHOOK` - (Optional) Slack webhook for notifications
+- `CODECOV_TOKEN` - (Optional) Codecov token for coverage reporting
+
+### Running Workflows Locally
+
+You can test workflows locally using [act](https://github.com/nektos/act):
 
 ```bash
-# Run all tests
-pytest
+# Install act
+curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
 
-# Run with coverage
-pytest --cov=src --cov-report=html
+# Test code quality workflow
+act -W .github/workflows/ci-code-quality.yml
 
-# Run specific test file
-pytest tests/unit/test_auth_service.py
+# Test with specific event
+act pull_request -W .github/workflows/ci-pr.yml
 ```
 
-## Code Quality
+### Automated Dependency Updates
 
-```bash
-# Format code
-black src/ tests/
+Dependabot is configured to automatically create PRs for:
+- Python package updates (weekly)
+- GitHub Actions updates (weekly)
+- Docker base image updates (weekly)
 
-# Lint code
-ruff check src/ tests/
-
-# Type checking
-mypy src/
-
-# Security scan
-bandit -r src/
-pip-audit
-```
 
 ## Project Structure
 

@@ -1,15 +1,17 @@
 """Comment model for issue discussions."""
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy import String, DateTime, Text, ForeignKey, CheckConstraint
+
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
 if TYPE_CHECKING:
-    from src.models.user import User
     from src.models.issue import Issue
+    from src.models.user import User
 
 
 class Comment(Base):
@@ -18,9 +20,7 @@ class Comment(Base):
     __tablename__ = "comments"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Content
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -45,12 +45,8 @@ class Comment(Base):
     )
 
     # Relationships
-    issue: Mapped["Issue"] = relationship(
-        "Issue", back_populates="comments"
-    )
-    author: Mapped["User"] = relationship(
-        "User", back_populates="comments"
-    )
+    issue: Mapped["Issue"] = relationship("Issue", back_populates="comments")
+    author: Mapped["User"] = relationship("User", back_populates="comments")
 
     # Constraints
     __table_args__ = (

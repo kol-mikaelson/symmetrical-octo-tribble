@@ -1,7 +1,9 @@
 """Token blacklist model for JWT invalidation."""
+
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime
+
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database.database import Base
@@ -13,9 +15,7 @@ class TokenBlacklist(Base):
     __tablename__ = "token_blacklist"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Token Information
     jti: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)  # JWT ID

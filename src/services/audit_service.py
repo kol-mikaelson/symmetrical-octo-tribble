@@ -1,9 +1,9 @@
 """Audit logging service for tracking sensitive operations."""
-import uuid
-from datetime import datetime
-from typing import Optional, Any
-from sqlalchemy.ext.asyncio import AsyncSession
+
 import json
+from typing import Any, Optional
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.audit_log import AuditLog
 from src.models.user import User

@@ -1,17 +1,20 @@
 """Issue model for bug tracking."""
+
+import enum
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
-import enum
-from sqlalchemy import String, DateTime, Text, ForeignKey, Enum as SQLEnum, CheckConstraint
+
+from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
 if TYPE_CHECKING:
-    from src.models.user import User
-    from src.models.project import Project
     from src.models.comment import Comment
+    from src.models.project import Project
+    from src.models.user import User
 
 
 class IssueStatus(str, enum.Enum):
@@ -39,9 +42,7 @@ class Issue(Base):
     __tablename__ = "issues"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Basic Information
     title: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
@@ -82,17 +83,11 @@ class Issue(Base):
         onupdate=datetime.utcnow,
         nullable=False,
     )
-    resolved_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    closed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    project: Mapped["Project"] = relationship(
-        "Project", back_populates="issues"
-    )
+    project: Mapped["Project"] = relationship("Project", back_populates="issues")
     reporter: Mapped["User"] = relationship(
         "User", back_populates="reported_issues", foreign_keys=[reporter_id]
     )

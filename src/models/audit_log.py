@@ -1,8 +1,10 @@
 """Audit log model for tracking sensitive operations."""
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
-from sqlalchemy import String, DateTime, Text, ForeignKey, Boolean
+
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
@@ -17,9 +19,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # User Information
     user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
@@ -45,9 +45,7 @@ class AuditLog(Base):
     )
 
     # Relationships
-    user: Mapped[Optional["User"]] = relationship(
-        "User", back_populates="audit_logs"
-    )
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="audit_logs")
 
     def __repr__(self) -> str:
         """String representation of AuditLog."""

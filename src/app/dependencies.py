@@ -1,19 +1,20 @@
 """FastAPI dependency injection functions."""
-import uuid
-from typing import AsyncGenerator, Optional
-from fastapi import Depends, Header, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
-import redis.asyncio as redis
 
+from collections.abc import AsyncGenerator
+from typing import Optional
+
+import redis.asyncio as redis
+from fastapi import Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.app.config import settings
+from src.app.exceptions import InsufficientPermissionsError
 from src.database.database import get_db
 from src.models.user import User, UserRole
+from src.services.audit_service import AuditService
 from src.services.auth_service import AuthService
 from src.services.permission_service import PermissionService
-from src.services.audit_service import AuditService
-from src.app.config import settings
-from src.app.exceptions import UnauthorizedError, InsufficientPermissionsError
-
 
 # HTTP Bearer token scheme
 security = HTTPBearer()
@@ -154,6 +155,7 @@ def require_role(*roles: UserRole):
     Returns:
         Dependency function
     """
+
     async def role_checker(
         current_user: User = Depends(get_current_active_user),
         permission_service: PermissionService = Depends(get_permission_service),

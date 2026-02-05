@@ -1,7 +1,9 @@
 """Project schemas for request/response validation."""
+
 import uuid
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
 from src.schemas.user import UserResponse

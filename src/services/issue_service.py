@@ -1,16 +1,18 @@
 """Issue service for business logic."""
+
 import uuid
-from typing import Optional, List, Tuple
 from datetime import datetime
-from sqlalchemy import select, func, or_
+from typing import Optional
+
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.models.issue import Issue, IssueStatus, IssuePriority
+from src.app.exceptions import NotFoundError
+from src.models.issue import Issue, IssuePriority, IssueStatus
 from src.models.user import User
 from src.schemas.issue import IssueCreate, IssueUpdate
-from src.app.exceptions import NotFoundError
-from src.utils.validators import validate_state_transition, validate_critical_issue_closure
+from src.utils.validators import validate_critical_issue_closure, validate_state_transition
 
 
 class IssueService:
@@ -92,7 +94,7 @@ class IssueService:
         assignee_id: Optional[uuid.UUID] = None,
         sort_by: str = "created_at",
         sort_desc: bool = True,
-    ) -> Tuple[List[Issue], int]:
+    ) -> tuple[list[Issue], int]:
         """List issues with pagination and filtering.
 
         Args:
@@ -159,9 +161,7 @@ class IssueService:
 
         return list(issues), total
 
-    async def update_issue(
-        self, issue_id: uuid.UUID, issue_data: IssueUpdate
-    ) -> Issue:
+    async def update_issue(self, issue_id: uuid.UUID, issue_data: IssueUpdate) -> Issue:
         """Update an issue.
 
         Args:

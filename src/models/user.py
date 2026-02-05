@@ -1,10 +1,13 @@
 """User model for authentication and authorization."""
+
+import enum
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Boolean, DateTime, Integer, Enum as SQLEnum
+
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import enum
 
 from src.database.database import Base
 
@@ -23,9 +26,7 @@ class User(Base):
     __tablename__ = "users"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Authentication
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
@@ -48,9 +49,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.utcnow, nullable=False
     )
-    last_login: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     created_projects: Mapped[list["Project"]] = relationship(
@@ -62,15 +61,11 @@ class User(Base):
     assigned_issues: Mapped[list["Issue"]] = relationship(
         "Issue", back_populates="assignee", foreign_keys="Issue.assignee_id"
     )
-    comments: Mapped[list["Comment"]] = relationship(
-        "Comment", back_populates="author"
-    )
+    comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="author")
     sessions: Mapped[list["UserSession"]] = relationship(
         "UserSession", back_populates="user", cascade="all, delete-orphan"
     )
-    audit_logs: Mapped[list["AuditLog"]] = relationship(
-        "AuditLog", back_populates="user"
-    )
+    audit_logs: Mapped[list["AuditLog"]] = relationship("AuditLog", back_populates="user")
 
     def __repr__(self) -> str:
         """String representation of User."""

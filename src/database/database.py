@@ -1,11 +1,12 @@
 """Database configuration and session management."""
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
 
 from src.app.config import settings
-
 
 # Convert postgresql:// to postgresql+asyncpg://
 database_url = settings.database_url.replace("postgresql://", "postgresql+asyncpg://")

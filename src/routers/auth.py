@@ -1,25 +1,25 @@
 """Authentication router for user registration, login, and token management."""
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
-from src.schemas.user import (
-    UserRegister,
-    UserLogin,
-    UserResponse,
-    TokenResponse,
-    TokenRefresh,
-)
-from src.services.auth_service import AuthService
-from src.services.audit_service import AuditService
 from src.app.dependencies import (
-    get_auth_service,
     get_audit_service,
-    get_current_active_user,
+    get_auth_service,
     get_client_ip,
+    get_current_active_user,
     get_user_agent,
 )
 from src.models.user import User
-
+from src.schemas.user import (
+    TokenRefresh,
+    TokenResponse,
+    UserLogin,
+    UserRegister,
+    UserResponse,
+)
+from src.services.audit_service import AuditService
+from src.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -64,7 +64,7 @@ async def register(
         )
 
         return UserResponse.model_validate(user)
-    except Exception as e:
+    except Exception:
         # Log failed registration
         await audit_service.log_auth_event(
             action="USER_REGISTRATION_FAILED",
@@ -102,9 +102,7 @@ async def login(
         Token response with access and refresh tokens
     """
     try:
-        user, token_response = await auth_service.login_user(
-            credentials, ip_address, user_agent
-        )
+        user, token_response = await auth_service.login_user(credentials, ip_address, user_agent)
 
         # Log successful login
         await audit_service.log_auth_event(
@@ -117,7 +115,7 @@ async def login(
         )
 
         return token_response
-    except Exception as e:
+    except Exception:
         # Log failed login
         await audit_service.log_auth_event(
             action="USER_LOGIN_FAILED",

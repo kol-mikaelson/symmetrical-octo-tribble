@@ -1,28 +1,29 @@
 """Authentication service for user registration, login, and token management."""
+
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+
+import redis.asyncio as redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import redis.asyncio as redis
 
-from src.models.user import User, UserRole
-from src.models.user_session import UserSession
-from src.models.token_blacklist import TokenBlacklist
-from src.schemas.user import UserRegister, UserLogin, TokenResponse
-from src.utils.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-)
 from src.app.config import settings
 from src.app.exceptions import (
-    UnauthorizedError,
     ConflictError,
     ForbiddenError,
     TokenExpiredError,
+    UnauthorizedError,
+)
+from src.models.token_blacklist import TokenBlacklist
+from src.models.user import User
+from src.models.user_session import UserSession
+from src.schemas.user import TokenResponse, UserLogin, UserRegister
+from src.utils.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    hash_password,
+    verify_password,
 )
 
 
@@ -39,9 +40,7 @@ class AuthService:
         self.db = db
         self.redis = redis_client
 
-    async def register_user(
-        self, user_data: UserRegister, ip_address: str
-    ) -> User:
+    async def register_user(self, user_data: UserRegister, ip_address: str) -> User:
         """Register a new user.
 
         Args:
@@ -55,16 +54,12 @@ class AuthService:
             ConflictError: If username or email already exists
         """
         # Check if username exists
-        result = await self.db.execute(
-            select(User).where(User.username == user_data.username)
-        )
+        result = await self.db.execute(select(User).where(User.username == user_data.username))
         if result.scalar_one_or_none():
             raise ConflictError("Username already exists")
 
         # Check if email exists
-        result = await self.db.execute(
-            select(User).where(User.email == user_data.email)
-        )
+        result = await self.db.execute(select(User).where(User.email == user_data.email))
         if result.scalar_one_or_none():
             raise ConflictError("Email already exists")
 
@@ -84,7 +79,7 @@ class AuthService:
 
     async def login_user(
         self, credentials: UserLogin, ip_address: str, user_agent: str
-    ) -> Tuple[User, TokenResponse]:
+    ) -> tuple[User, TokenResponse]:
         """Authenticate user and generate tokens.
 
         Args:
@@ -100,9 +95,7 @@ class AuthService:
             ForbiddenError: If account is locked
         """
         # Get user by email
-        result = await self.db.execute(
-            select(User).where(User.email == credentials.email)
-        )
+        result = await self.db.execute(select(User).where(User.email == credentials.email))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -110,9 +103,7 @@ class AuthService:
 
         # Check if account is locked
         if user.locked_until and user.locked_until > datetime.utcnow():
-            raise ForbiddenError(
-                f"Account is locked until {user.locked_until.isoformat()}"
-            )
+            raise ForbiddenError(f"Account is locked until {user.locked_until.isoformat()}")
 
         # Verify password
         if not verify_password(credentials.password, user.password_hash):
@@ -152,8 +143,7 @@ class AuthService:
             refresh_token_jti=refresh_jti,
             ip_address=ip_address,
             user_agent=user_agent,
-            expires_at=datetime.utcnow()
-            + timedelta(days=settings.jwt_refresh_token_expire_days),
+            expires_at=datetime.utcnow() + timedelta(days=settings.jwt_refresh_token_expire_days),
         )
         self.db.add(session)
 
@@ -162,7 +152,7 @@ class AuthService:
         token_response = TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            token_type="bearer",
+            token_type="bearer",  # nosec B106
             expires_in=settings.jwt_access_token_expire_minutes * 60,
         )
 
@@ -210,7 +200,7 @@ class AuthService:
         return TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,  # Return same refresh token
-            token_type="bearer",
+            token_type="bearer",  # nosec B106
             expires_in=settings.jwt_access_token_expire_minutes * 60,
         )
 
@@ -228,7 +218,7 @@ class AuthService:
         # Blacklist access token
         access_blacklist = TokenBlacklist(
             jti=access_payload["jti"],
-            token_type="access",
+            token_type="access",  # nosec B106
             expires_at=datetime.fromtimestamp(access_payload["exp"]),
         )
         self.db.add(access_blacklist)
@@ -236,16 +226,14 @@ class AuthService:
         # Blacklist refresh token
         refresh_blacklist = TokenBlacklist(
             jti=refresh_payload["jti"],
-            token_type="refresh",
+            token_type="refresh",  # nosec B106
             expires_at=datetime.fromtimestamp(refresh_payload["exp"]),
         )
         self.db.add(refresh_blacklist)
 
         # Delete user session
         await self.db.execute(
-            select(UserSession).where(
-                UserSession.refresh_token_jti == refresh_payload["jti"]
-            )
+            select(UserSession).where(UserSession.refresh_token_jti == refresh_payload["jti"])
         )
 
         await self.db.commit()
@@ -257,24 +245,20 @@ class AuthService:
             user_id: User ID
         """
         # Get all user sessions
-        result = await self.db.execute(
-            select(UserSession).where(UserSession.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserSession).where(UserSession.user_id == user_id))
         sessions = result.scalars().all()
 
         # Blacklist all refresh tokens
         for session in sessions:
             blacklist = TokenBlacklist(
                 jti=session.refresh_token_jti,
-                token_type="refresh",
+                token_type="refresh",  # nosec B106
                 expires_at=session.expires_at,
             )
             self.db.add(blacklist)
 
         # Delete all sessions
-        await self.db.execute(
-            select(UserSession).where(UserSession.user_id == user_id)
-        )
+        await self.db.execute(select(UserSession).where(UserSession.user_id == user_id))
 
         await self.db.commit()
 
@@ -288,9 +272,7 @@ class AuthService:
             True if blacklisted, False otherwise
         """
         # Check in database
-        result = await self.db.execute(
-            select(TokenBlacklist).where(TokenBlacklist.jti == jti)
-        )
+        result = await self.db.execute(select(TokenBlacklist).where(TokenBlacklist.jti == jti))
         return result.scalar_one_or_none() is not None
 
     async def get_current_user(self, token: str) -> User:
