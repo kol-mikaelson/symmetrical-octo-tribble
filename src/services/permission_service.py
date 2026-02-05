@@ -1,4 +1,5 @@
 """Permission service for role-based and resource-level access control."""
+
 import uuid
 from typing import Optional
 from sqlalchemy import select
@@ -48,9 +49,7 @@ class PermissionService:
             return True
 
         # Get project
-        result = await self.db.execute(
-            select(Project).where(Project.id == project_id)
-        )
+        result = await self.db.execute(select(Project).where(Project.id == project_id))
         project = result.scalar_one_or_none()
 
         if not project:
@@ -99,9 +98,7 @@ class PermissionService:
             return True
 
         # Get issue
-        result = await self.db.execute(
-            select(Issue).where(Issue.id == issue_id)
-        )
+        result = await self.db.execute(select(Issue).where(Issue.id == issue_id))
         issue = result.scalar_one_or_none()
 
         if not issue:
@@ -129,9 +126,7 @@ class PermissionService:
             return True
 
         # Get issue
-        result = await self.db.execute(
-            select(Issue).where(Issue.id == issue_id)
-        )
+        result = await self.db.execute(select(Issue).where(Issue.id == issue_id))
         issue = result.scalar_one_or_none()
 
         if not issue:
@@ -167,9 +162,7 @@ class PermissionService:
             return True
 
         # Get comment
-        result = await self.db.execute(
-            select(Comment).where(Comment.id == comment_id)
-        )
+        result = await self.db.execute(select(Comment).where(Comment.id == comment_id))
         comment = result.scalar_one_or_none()
 
         if not comment:

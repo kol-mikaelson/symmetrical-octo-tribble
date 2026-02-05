@@ -1,4 +1,5 @@
 """Custom exception classes for the application."""
+
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, status
 
@@ -46,7 +47,9 @@ class InvalidStateTransitionError(APIException):
     """Raised when an invalid state transition is attempted."""
 
     def __init__(
-        self, message: str = "Invalid state transition", details: Optional[List[Dict[str, Any]]] = None
+        self,
+        message: str = "Invalid state transition",
+        details: Optional[List[Dict[str, Any]]] = None,
     ) -> None:
         """Initialize invalid state transition error."""
         super().__init__(

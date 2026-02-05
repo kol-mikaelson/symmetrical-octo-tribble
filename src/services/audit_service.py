@@ -1,4 +1,5 @@
 """Audit logging service for tracking sensitive operations."""
+
 import uuid
 from datetime import datetime
 from typing import Optional, Any

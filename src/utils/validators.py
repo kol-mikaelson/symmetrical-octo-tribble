@@ -1,4 +1,5 @@
 """Custom validators for request validation."""
+
 from typing import Optional
 from src.models.issue import IssueStatus
 from src.app.exceptions import InvalidStateTransitionError

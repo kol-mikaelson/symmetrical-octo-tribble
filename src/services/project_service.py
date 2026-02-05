@@ -1,4 +1,5 @@
 """Project service for business logic."""
+
 import uuid
 from typing import Optional, List, Tuple
 from sqlalchemy import select, func, or_
@@ -23,9 +24,7 @@ class ProjectService:
         """
         self.db = db
 
-    async def create_project(
-        self, project_data: ProjectCreate, creator: User
-    ) -> Project:
+    async def create_project(self, project_data: ProjectCreate, creator: User) -> Project:
         """Create a new project.
 
         Args:
@@ -39,9 +38,7 @@ class ProjectService:
             ConflictError: If project name already exists
         """
         # Check if project name exists
-        result = await self.db.execute(
-            select(Project).where(Project.name == project_data.name)
-        )
+        result = await self.db.execute(select(Project).where(Project.name == project_data.name))
         if result.scalar_one_or_none():
             raise ConflictError(f"Project with name '{project_data.name}' already exists")
 
@@ -71,9 +68,7 @@ class ProjectService:
             NotFoundError: If project not found
         """
         result = await self.db.execute(
-            select(Project)
-            .where(Project.id == project_id)
-            .options(selectinload(Project.creator))
+            select(Project).where(Project.id == project_id).options(selectinload(Project.creator))
         )
         project = result.scalar_one_or_none()
 
@@ -141,9 +136,7 @@ class ProjectService:
 
         return list(projects), total
 
-    async def update_project(
-        self, project_id: uuid.UUID, project_data: ProjectUpdate
-    ) -> Project:
+    async def update_project(self, project_id: uuid.UUID, project_data: ProjectUpdate) -> Project:
         """Update a project.
 
         Args:
@@ -161,9 +154,7 @@ class ProjectService:
 
         # Check name conflict if changing name
         if project_data.name and project_data.name != project.name:
-            result = await self.db.execute(
-                select(Project).where(Project.name == project_data.name)
-            )
+            result = await self.db.execute(select(Project).where(Project.name == project_data.name))
             if result.scalar_one_or_none():
                 raise ConflictError(f"Project with name '{project_data.name}' already exists")
 

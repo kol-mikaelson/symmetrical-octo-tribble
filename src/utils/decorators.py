@@ -1,4 +1,5 @@
 """Utility decorators for common functionality."""
+
 import functools
 from typing import Callable, Any
 from datetime import datetime
@@ -16,6 +17,7 @@ def audit_log(action: str) -> Callable:
     Returns:
         Decorator function
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:

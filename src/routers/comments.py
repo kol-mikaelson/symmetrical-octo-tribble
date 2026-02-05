@@ -1,4 +1,5 @@
 """Comments router for CRUD operations."""
+
 import uuid
 from fastapi import APIRouter, Depends, Query, status
 from math import ceil
@@ -168,9 +169,7 @@ async def update_comment(
         Updated comment
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "edit_comment", comment_id
-    )
+    await permission_service.require_permission(current_user, "edit_comment", comment_id)
 
     # Get old comment for audit
     old_comment = await comment_service.get_comment(comment_id)

@@ -1,4 +1,5 @@
 """Authentication service for user registration, login, and token management."""
+
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
@@ -39,9 +40,7 @@ class AuthService:
         self.db = db
         self.redis = redis_client
 
-    async def register_user(
-        self, user_data: UserRegister, ip_address: str
-    ) -> User:
+    async def register_user(self, user_data: UserRegister, ip_address: str) -> User:
         """Register a new user.
 
         Args:
@@ -55,16 +54,12 @@ class AuthService:
             ConflictError: If username or email already exists
         """
         # Check if username exists
-        result = await self.db.execute(
-            select(User).where(User.username == user_data.username)
-        )
+        result = await self.db.execute(select(User).where(User.username == user_data.username))
         if result.scalar_one_or_none():
             raise ConflictError("Username already exists")
 
         # Check if email exists
-        result = await self.db.execute(
-            select(User).where(User.email == user_data.email)
-        )
+        result = await self.db.execute(select(User).where(User.email == user_data.email))
         if result.scalar_one_or_none():
             raise ConflictError("Email already exists")
 
@@ -100,9 +95,7 @@ class AuthService:
             ForbiddenError: If account is locked
         """
         # Get user by email
-        result = await self.db.execute(
-            select(User).where(User.email == credentials.email)
-        )
+        result = await self.db.execute(select(User).where(User.email == credentials.email))
         user = result.scalar_one_or_none()
 
         if not user:
@@ -110,9 +103,7 @@ class AuthService:
 
         # Check if account is locked
         if user.locked_until and user.locked_until > datetime.utcnow():
-            raise ForbiddenError(
-                f"Account is locked until {user.locked_until.isoformat()}"
-            )
+            raise ForbiddenError(f"Account is locked until {user.locked_until.isoformat()}")
 
         # Verify password
         if not verify_password(credentials.password, user.password_hash):
@@ -152,8 +143,7 @@ class AuthService:
             refresh_token_jti=refresh_jti,
             ip_address=ip_address,
             user_agent=user_agent,
-            expires_at=datetime.utcnow()
-            + timedelta(days=settings.jwt_refresh_token_expire_days),
+            expires_at=datetime.utcnow() + timedelta(days=settings.jwt_refresh_token_expire_days),
         )
         self.db.add(session)
 
@@ -243,9 +233,7 @@ class AuthService:
 
         # Delete user session
         await self.db.execute(
-            select(UserSession).where(
-                UserSession.refresh_token_jti == refresh_payload["jti"]
-            )
+            select(UserSession).where(UserSession.refresh_token_jti == refresh_payload["jti"])
         )
 
         await self.db.commit()
@@ -257,9 +245,7 @@ class AuthService:
             user_id: User ID
         """
         # Get all user sessions
-        result = await self.db.execute(
-            select(UserSession).where(UserSession.user_id == user_id)
-        )
+        result = await self.db.execute(select(UserSession).where(UserSession.user_id == user_id))
         sessions = result.scalars().all()
 
         # Blacklist all refresh tokens
@@ -272,9 +258,7 @@ class AuthService:
             self.db.add(blacklist)
 
         # Delete all sessions
-        await self.db.execute(
-            select(UserSession).where(UserSession.user_id == user_id)
-        )
+        await self.db.execute(select(UserSession).where(UserSession.user_id == user_id))
 
         await self.db.commit()
 
@@ -288,9 +272,7 @@ class AuthService:
             True if blacklisted, False otherwise
         """
         # Check in database
-        result = await self.db.execute(
-            select(TokenBlacklist).where(TokenBlacklist.jti == jti)
-        )
+        result = await self.db.execute(select(TokenBlacklist).where(TokenBlacklist.jti == jti))
         return result.scalar_one_or_none() is not None
 
     async def get_current_user(self, token: str) -> User:

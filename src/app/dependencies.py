@@ -1,4 +1,5 @@
 """FastAPI dependency injection functions."""
+
 import uuid
 from typing import AsyncGenerator, Optional
 from fastapi import Depends, Header, HTTPException, status
@@ -154,6 +155,7 @@ def require_role(*roles: UserRole):
     Returns:
         Dependency function
     """
+
     async def role_checker(
         current_user: User = Depends(get_current_active_user),
         permission_service: PermissionService = Depends(get_permission_service),

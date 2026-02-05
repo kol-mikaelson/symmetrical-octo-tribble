@@ -1,4 +1,5 @@
 """Issue service for business logic."""
+
 import uuid
 from typing import Optional, List, Tuple
 from datetime import datetime
@@ -159,9 +160,7 @@ class IssueService:
 
         return list(issues), total
 
-    async def update_issue(
-        self, issue_id: uuid.UUID, issue_data: IssueUpdate
-    ) -> Issue:
+    async def update_issue(self, issue_id: uuid.UUID, issue_data: IssueUpdate) -> Issue:
         """Update an issue.
 
         Args:

@@ -1,4 +1,5 @@
 """Projects router for CRUD operations."""
+
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
@@ -201,9 +202,7 @@ async def update_project(
         Updated project
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "edit_project", project_id
-    )
+    await permission_service.require_permission(current_user, "edit_project", project_id)
 
     # Get old project for audit
     old_project = await project_service.get_project(project_id)
@@ -252,9 +251,7 @@ async def archive_project(
         audit_service: Audit service
     """
     # Check permission
-    await permission_service.require_permission(
-        current_user, "archive_project", project_id
-    )
+    await permission_service.require_permission(current_user, "archive_project", project_id)
 
     # Archive project
     project = await project_service.archive_project(project_id)

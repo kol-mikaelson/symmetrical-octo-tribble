@@ -1,4 +1,5 @@
 """Issues router for CRUD operations."""
+
 import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, status

@@ -1,4 +1,5 @@
 """Project model for organizing issues."""
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -18,9 +19,7 @@ class Project(Base):
     __tablename__ = "projects"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Basic Information
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)

@@ -1,4 +1,5 @@
 """Common schemas for error responses and pagination."""
+
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field

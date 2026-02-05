@@ -1,4 +1,5 @@
 """Authentication router for user registration, login, and token management."""
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
@@ -102,9 +103,7 @@ async def login(
         Token response with access and refresh tokens
     """
     try:
-        user, token_response = await auth_service.login_user(
-            credentials, ip_address, user_agent
-        )
+        user, token_response = await auth_service.login_user(credentials, ip_address, user_agent)
 
         # Log successful login
         await audit_service.log_auth_event(

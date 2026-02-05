@@ -1,4 +1,5 @@
 """Application configuration using Pydantic Settings."""
+
 from typing import List
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -44,15 +45,11 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = Field(
         default=15, alias="JWT_ACCESS_TOKEN_EXPIRE_MINUTES"
     )
-    jwt_refresh_token_expire_days: int = Field(
-        default=7, alias="JWT_REFRESH_TOKEN_EXPIRE_DAYS"
-    )
+    jwt_refresh_token_expire_days: int = Field(default=7, alias="JWT_REFRESH_TOKEN_EXPIRE_DAYS")
     jwt_private_key_path: str = Field(
         default="./keys/private_key.pem", alias="JWT_PRIVATE_KEY_PATH"
     )
-    jwt_public_key_path: str = Field(
-        default="./keys/public_key.pem", alias="JWT_PUBLIC_KEY_PATH"
-    )
+    jwt_public_key_path: str = Field(default="./keys/public_key.pem", alias="JWT_PUBLIC_KEY_PATH")
 
     # Security
     secret_key: str = Field(..., alias="SECRET_KEY")  # Required
@@ -65,14 +62,10 @@ class Settings(BaseSettings):
     # Rate Limiting
     rate_limit_enabled: bool = Field(default=True, alias="RATE_LIMIT_ENABLED")
     rate_limit_per_minute: int = Field(default=100, alias="RATE_LIMIT_PER_MINUTE")
-    login_rate_limit_per_minute: int = Field(
-        default=5, alias="LOGIN_RATE_LIMIT_PER_MINUTE"
-    )
+    login_rate_limit_per_minute: int = Field(default=5, alias="LOGIN_RATE_LIMIT_PER_MINUTE")
 
     # CORS
-    cors_origins: List[str] = Field(
-        default=["http://localhost:3000"], alias="CORS_ORIGINS"
-    )
+    cors_origins: List[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
     cors_allow_credentials: bool = Field(default=True, alias="CORS_ALLOW_CREDENTIALS")
 
     # Pagination

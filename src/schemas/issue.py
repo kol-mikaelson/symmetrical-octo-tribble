@@ -1,4 +1,5 @@
 """Issue schemas for request/response validation."""
+
 import uuid
 from datetime import datetime
 from typing import Optional

@@ -1,4 +1,5 @@
 """Issue model for bug tracking."""
+
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
@@ -39,9 +40,7 @@ class Issue(Base):
     __tablename__ = "issues"
 
     # Primary Key
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, index=True
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, index=True)
 
     # Basic Information
     title: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
@@ -82,17 +81,11 @@ class Issue(Base):
         onupdate=datetime.utcnow,
         nullable=False,
     )
-    resolved_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    closed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    project: Mapped["Project"] = relationship(
-        "Project", back_populates="issues"
-    )
+    project: Mapped["Project"] = relationship("Project", back_populates="issues")
     reporter: Mapped["User"] = relationship(
         "User", back_populates="reported_issues", foreign_keys=[reporter_id]
     )

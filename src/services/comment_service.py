@@ -1,4 +1,5 @@
 """Comment service for business logic."""
+
 import uuid
 from typing import List, Tuple
 from sqlalchemy import select, func
@@ -110,9 +111,7 @@ class CommentService:
 
         return list(comments), total
 
-    async def update_comment(
-        self, comment_id: uuid.UUID, comment_data: CommentUpdate
-    ) -> Comment:
+    async def update_comment(self, comment_id: uuid.UUID, comment_data: CommentUpdate) -> Comment:
         """Update a comment.
 
         Args:
