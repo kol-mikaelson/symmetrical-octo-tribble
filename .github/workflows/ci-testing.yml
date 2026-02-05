@@ -1,0 +1,49 @@
+name: Testing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests with coverage
+        run: pytest tests/unit --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=70
+        env:
+          SECRET_KEY: test-secret-key-for-ci-only
+          CORS_ORIGINS: http://localhost:3000
+          PYTHONPATH: .
+
+      - name: Check coverage threshold
+        run: |
+          coverage report --fail-under=30 || echo "⚠️ Coverage is below 30%. Current tests provide baseline coverage."
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            htmlcov/
+            coverage.xml
+          retention-days: 30
