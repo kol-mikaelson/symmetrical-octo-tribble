@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  api:
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=True
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ../src:/app/src:rw
+      - ../seed_data.py:/app/seed_data.py:rw
+    command: uvicorn src.app.main:app --host 0.0.0.0 --port 8000 --reload

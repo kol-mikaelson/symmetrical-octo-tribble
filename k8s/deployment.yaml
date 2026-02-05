@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bug-reporting-api
+  labels:
+    app: bug-reporting-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bug-reporting-api
+  template:
+    metadata:
+      labels:
+        app: bug-reporting-api
+    spec:
+      containers:
+      - name: api
+        image: bug-reporting-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: bug-reporting-config
+              key: environment
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bug-reporting-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: bug-reporting-config
+              key: redis-url
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bug-reporting-secrets
+              key: secret-key
+        - name: JWT_PRIVATE_KEY_PATH
+          value: /app/keys/private_key.pem
+        - name: JWT_PUBLIC_KEY_PATH
+          value: /app/keys/public_key.pem
+        volumeMounts:
+        - name: jwt-keys
+          mountPath: /app/keys
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: jwt-keys
+        secret:
+          secretName: jwt-keys

@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: bug-reporting-db
+    environment:
+      POSTGRES_USER: buguser
+      POSTGRES_PASSWORD: bugpass
+      POSTGRES_DB: bugreporting
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buguser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bug-reporting-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: bug-reporting-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bug-reporting-network
+
+  # FastAPI Application
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bug-reporting-api
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://buguser:bugpass@db:5432/bugreporting
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=change-this-in-production-use-secrets-manager
+      - JWT_PRIVATE_KEY_PATH=/app/keys/private_key.pem
+      - JWT_PUBLIC_KEY_PATH=/app/keys/public_key.pem
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+    volumes:
+      - ../keys:/app/keys:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bug-reporting-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: bug-reporting-nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - bug-reporting-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  bug-reporting-network:
+    driver: bridge

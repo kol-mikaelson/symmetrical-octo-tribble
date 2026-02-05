@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bug-reporting-config
+data:
+  environment: "production"
+  log-level: "INFO"
+  redis-url: "redis://redis-service:6379/0"
+  cors-origins: "https://yourdomain.com"
+  api-prefix: "/api"
