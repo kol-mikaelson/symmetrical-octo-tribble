@@ -1,6 +1,6 @@
 # FastAPI and ASGI Server
 fastapi>=0.115.0
-uvicorn[standard]==0.24.0
+uvicorn[standard]==0.40.0
 starlette>=0.47.2
 
 # Database
