@@ -60,11 +60,14 @@ async def test_login_user_success(auth_service, mock_db_session):
     mock_db_session.execute.return_value.scalar_one_or_none.return_value = user
     
     # Mock password verification (need to match what verify_password expects or mock it)
+    # Mock password verification (need to match what verify_password expects or mock it)
     with patch("src.services.auth_service.verify_password", return_value=True):
-        credentials = UserLogin(email="test@example.com", password="Password123!")
-        user_result, token = await auth_service.login_user(credentials, "127.0.0.1", "user-agent")
-        
-        assert user_result == user
-        assert token.access_token is not None
+        # Mock create_access_token to avoid key loading issues
+        with patch("src.services.auth_service.create_access_token", return_value=("mock_token", "mock_jti")):
+            credentials = UserLogin(email="test@example.com", password="Password123!")
+            user_result, token = await auth_service.login_user(credentials, "127.0.0.1", "user-agent")
+            
+            assert user_result == user
+            assert token.access_token == "mock_token"
 
 from unittest.mock import patch
