@@ -2,28 +2,28 @@
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+
+import redis.asyncio as redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import redis.asyncio as redis
 
-from src.models.user import User, UserRole
-from src.models.user_session import UserSession
-from src.models.token_blacklist import TokenBlacklist
-from src.schemas.user import UserRegister, UserLogin, TokenResponse
-from src.utils.security import (
-    hash_password,
-    verify_password,
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-)
 from src.app.config import settings
 from src.app.exceptions import (
-    UnauthorizedError,
     ConflictError,
     ForbiddenError,
     TokenExpiredError,
+    UnauthorizedError,
+)
+from src.models.token_blacklist import TokenBlacklist
+from src.models.user import User
+from src.models.user_session import UserSession
+from src.schemas.user import TokenResponse, UserLogin, UserRegister
+from src.utils.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    hash_password,
+    verify_password,
 )
 
 
@@ -79,7 +79,7 @@ class AuthService:
 
     async def login_user(
         self, credentials: UserLogin, ip_address: str, user_agent: str
-    ) -> Tuple[User, TokenResponse]:
+    ) -> tuple[User, TokenResponse]:
         """Authenticate user and generate tokens.
 
         Args:

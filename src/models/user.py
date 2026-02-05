@@ -1,11 +1,13 @@
 """User model for authentication and authorization."""
 
+import enum
 import uuid
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, Boolean, DateTime, Integer, Enum as SQLEnum
+
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import enum
 
 from src.database.database import Base
 

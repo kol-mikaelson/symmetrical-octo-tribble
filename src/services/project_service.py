@@ -1,16 +1,16 @@
 """Project service for business logic."""
 
 import uuid
-from typing import Optional, List, Tuple
-from sqlalchemy import select, func, or_
+from typing import Optional
+
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from src.app.exceptions import ConflictError, NotFoundError
 from src.models.project import Project
 from src.models.user import User
 from src.schemas.project import ProjectCreate, ProjectUpdate
-from src.app.exceptions import NotFoundError, ConflictError
-from src.app.config import settings
 
 
 class ProjectService:
@@ -85,7 +85,7 @@ class ProjectService:
         is_archived: Optional[bool] = None,
         sort_by: str = "created_at",
         sort_desc: bool = True,
-    ) -> Tuple[List[Project], int]:
+    ) -> tuple[list[Project], int]:
         """List projects with pagination and filtering.
 
         Args:

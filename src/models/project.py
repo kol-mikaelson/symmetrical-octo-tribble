@@ -3,14 +3,15 @@
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy import String, Boolean, DateTime, Text, ForeignKey
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
 if TYPE_CHECKING:
-    from src.models.user import User
     from src.models.issue import Issue
+    from src.models.user import User
 
 
 class Project(Base):

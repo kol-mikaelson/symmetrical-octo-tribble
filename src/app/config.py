@@ -1,6 +1,6 @@
 """Application configuration using Pydantic Settings."""
 
-from typing import List
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
     login_rate_limit_per_minute: int = Field(default=5, alias="LOGIN_RATE_LIMIT_PER_MINUTE")
 
     # CORS
-    cors_origins: List[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
+    cors_origins: list[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
     cors_allow_credentials: bool = Field(default=True, alias="CORS_ALLOW_CREDENTIALS")
 
     # Pagination
@@ -77,7 +77,7 @@ class Settings(BaseSettings):
 
     @field_validator("cors_origins", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v: str | List[str]) -> List[str]:
+    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Parse CORS origins from comma-separated string or list."""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]

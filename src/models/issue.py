@@ -1,18 +1,20 @@
 """Issue model for bug tracking."""
 
+import enum
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
-import enum
-from sqlalchemy import String, DateTime, Text, ForeignKey, Enum as SQLEnum, CheckConstraint
+
+from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
 if TYPE_CHECKING:
-    from src.models.user import User
-    from src.models.project import Project
     from src.models.comment import Comment
+    from src.models.project import Project
+    from src.models.user import User
 
 
 class IssueStatus(str, enum.Enum):

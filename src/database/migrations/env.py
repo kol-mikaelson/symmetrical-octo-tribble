@@ -2,24 +2,17 @@
 
 import asyncio
 from logging.config import fileConfig
+
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from alembic import context
 
 # Import settings and models
 from src.app.config import settings
 from src.database.database import Base
 
 # Import all models to ensure they're registered
-from src.models.user import User
-from src.models.project import Project
-from src.models.issue import Issue
-from src.models.comment import Comment
-from src.models.audit_log import AuditLog
-from src.models.token_blacklist import TokenBlacklist
-from src.models.user_session import UserSession
 
 # This is the Alembic Config object
 config = context.config

@@ -48,4 +48,3 @@ bandit==1.7.5
 
 # Security Scanning
 pip-audit==2.6.1
-safety==3.0.1

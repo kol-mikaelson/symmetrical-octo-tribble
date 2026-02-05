@@ -2,15 +2,15 @@
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
 from pathlib import Path
+from typing import Any, Optional
+
+import bleach
 import jwt
 from passlib.context import CryptContext
-import bleach
 
 from src.app.config import settings
 from src.app.exceptions import TokenExpiredError, UnauthorizedError
-
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -136,7 +136,7 @@ def create_refresh_token(
     return encoded_jwt, jti
 
 
-def decode_token(token: str) -> Dict[str, Any]:
+def decode_token(token: str) -> dict[str, Any]:
     """Decode and verify a JWT token.
 
     Args:

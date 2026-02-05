@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field, field_validator
 
 from src.schemas.user import UserResponse

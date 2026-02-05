@@ -1,29 +1,28 @@
 """Projects router for CRUD operations."""
 
 import uuid
-from typing import Optional
-from fastapi import APIRouter, Depends, Query, status
 from math import ceil
+from typing import Optional
 
-from src.schemas.project import (
-    ProjectCreate,
-    ProjectUpdate,
-    ProjectResponse,
-    ProjectListResponse,
-)
-from src.services.project_service import ProjectService
-from src.services.permission_service import PermissionService
-from src.services.audit_service import AuditService
-from src.models.user import User, UserRole
-from src.app.dependencies import (
-    get_current_active_user,
-    get_client_ip,
-    require_role,
-)
-from src.app.config import settings
-from src.database.database import get_db
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.app.dependencies import (
+    get_client_ip,
+    get_current_active_user,
+    require_role,
+)
+from src.database.database import get_db
+from src.models.user import User, UserRole
+from src.schemas.project import (
+    ProjectCreate,
+    ProjectListResponse,
+    ProjectResponse,
+    ProjectUpdate,
+)
+from src.services.audit_service import AuditService
+from src.services.permission_service import PermissionService
+from src.services.project_service import ProjectService
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 

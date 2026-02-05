@@ -1,9 +1,9 @@
 """Utility decorators for common functionality."""
 
 import functools
-from typing import Callable, Any
-from datetime import datetime
 import logging
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

@@ -2,14 +2,15 @@
 
 import uuid
 from typing import Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models.user import User, UserRole
-from src.models.project import Project
-from src.models.issue import Issue
+from src.app.exceptions import InsufficientPermissionsError
 from src.models.comment import Comment
-from src.app.exceptions import ForbiddenError, InsufficientPermissionsError
+from src.models.issue import Issue
+from src.models.project import Project
+from src.models.user import User, UserRole
 
 
 class PermissionService:

@@ -3,9 +3,10 @@
 import uuid
 from datetime import datetime
 from typing import Optional
+
 from pydantic import BaseModel, Field
 
-from src.models.issue import IssueStatus, IssuePriority
+from src.models.issue import IssuePriority, IssueStatus
 from src.schemas.user import UserResponse
 
 

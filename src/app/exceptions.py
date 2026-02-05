@@ -1,6 +1,7 @@
 """Custom exception classes for the application."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
+
 from fastapi import HTTPException, status
 
 
@@ -12,7 +13,7 @@ class APIException(HTTPException):
         status_code: int,
         error_code: str,
         message: str,
-        details: Optional[List[Dict[str, Any]]] = None,
+        details: Optional[list[dict[str, Any]]] = None,
     ) -> None:
         """Initialize API exception.
 
@@ -32,7 +33,7 @@ class ValidationError(APIException):
     """Raised when request validation fails."""
 
     def __init__(
-        self, message: str = "Validation error", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Validation error", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize validation error."""
         super().__init__(
@@ -49,7 +50,7 @@ class InvalidStateTransitionError(APIException):
     def __init__(
         self,
         message: str = "Invalid state transition",
-        details: Optional[List[Dict[str, Any]]] = None,
+        details: Optional[list[dict[str, Any]]] = None,
     ) -> None:
         """Initialize invalid state transition error."""
         super().__init__(
@@ -64,7 +65,7 @@ class UnauthorizedError(APIException):
     """Raised when authentication fails."""
 
     def __init__(
-        self, message: str = "Unauthorized", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Unauthorized", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize unauthorized error."""
         super().__init__(
@@ -79,7 +80,7 @@ class TokenExpiredError(APIException):
     """Raised when JWT token has expired."""
 
     def __init__(
-        self, message: str = "Token has expired", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Token has expired", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize token expired error."""
         super().__init__(
@@ -94,7 +95,7 @@ class ForbiddenError(APIException):
     """Raised when user lacks permission for an action."""
 
     def __init__(
-        self, message: str = "Forbidden", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Forbidden", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize forbidden error."""
         super().__init__(
@@ -111,7 +112,7 @@ class InsufficientPermissionsError(APIException):
     def __init__(
         self,
         message: str = "Insufficient permissions",
-        details: Optional[List[Dict[str, Any]]] = None,
+        details: Optional[list[dict[str, Any]]] = None,
     ) -> None:
         """Initialize insufficient permissions error."""
         super().__init__(
@@ -126,7 +127,7 @@ class NotFoundError(APIException):
     """Raised when a resource is not found."""
 
     def __init__(
-        self, message: str = "Resource not found", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Resource not found", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize not found error."""
         super().__init__(
@@ -141,7 +142,7 @@ class ConflictError(APIException):
     """Raised when a resource conflict occurs."""
 
     def __init__(
-        self, message: str = "Resource conflict", details: Optional[List[Dict[str, Any]]] = None
+        self, message: str = "Resource conflict", details: Optional[list[dict[str, Any]]] = None
     ) -> None:
         """Initialize conflict error."""
         super().__init__(
@@ -158,7 +159,7 @@ class RateLimitError(APIException):
     def __init__(
         self,
         message: str = "Rate limit exceeded",
-        details: Optional[List[Dict[str, Any]]] = None,
+        details: Optional[list[dict[str, Any]]] = None,
     ) -> None:
         """Initialize rate limit error."""
         super().__init__(
@@ -175,7 +176,7 @@ class InternalError(APIException):
     def __init__(
         self,
         message: str = "Internal server error",
-        details: Optional[List[Dict[str, Any]]] = None,
+        details: Optional[list[dict[str, Any]]] = None,
     ) -> None:
         """Initialize internal error."""
         super().__init__(

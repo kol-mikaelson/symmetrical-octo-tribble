@@ -3,14 +3,15 @@
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
-from sqlalchemy import String, DateTime, Text, ForeignKey, CheckConstraint
+
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
 if TYPE_CHECKING:
-    from src.models.user import User
     from src.models.issue import Issue
+    from src.models.user import User
 
 
 class Comment(Base):
