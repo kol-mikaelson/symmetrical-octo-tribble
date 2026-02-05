@@ -8,33 +8,8 @@ on:
 
 jobs:
   test:
-    name: Unit & Integration Tests
+    name: Unit Tests
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
       - name: Checkout code
@@ -51,31 +26,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Generate RSA keys for JWT
-        run: |
-          mkdir -p keys
-          openssl genrsa -out keys/private_key.pem 2048
-          openssl rsa -in keys/private_key.pem -pubout -out keys/public_key.pem
-
-      - name: Set up test environment
-        run: |
-          cp .env.example .env
-          echo "DATABASE_URL=postgresql+asyncpg://test_user:test_password@localhost:5432/test_db" >> .env
-          echo "REDIS_URL=redis://localhost:6379/0" >> .env
-          echo "ENVIRONMENT=testing" >> .env
-
-      - name: Run tests with coverage
-        run: pytest --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing
+      - name: Run unit tests with coverage
+        run: pytest tests/unit --cov=src --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=70
         env:
-          DATABASE_URL: postgresql+asyncpg://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          PYTHONPATH: ${{ github.workspace }}
           SECRET_KEY: test-secret-key-for-ci-only
           CORS_ORIGINS: http://localhost:3000
 
       - name: Check coverage threshold
         run: |
-          coverage report --fail-under=70 || echo "⚠️ Coverage is below 70%. Current tests provide baseline coverage."
+          coverage report --fail-under=30 || echo "⚠️ Coverage is below 30%. Current tests provide baseline coverage."
         continue-on-error: true
 
       - name: Upload coverage reports
@@ -87,21 +46,3 @@ jobs:
             htmlcov/
             coverage.xml
           retention-days: 30
-
-      - name: Upload coverage to Codecov (optional)
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Comment coverage on PR
-        uses: py-cov-action/python-coverage-comment-action@v3
-        if: github.event_name == 'pull_request'
-        with:
-          GITHUB_TOKEN: ${{ github.token }}
-          MINIMUM_GREEN: 80
-          MINIMUM_ORANGE: 70

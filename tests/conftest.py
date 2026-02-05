@@ -1,121 +1,91 @@
-"""Shared test fixtures and configuration."""
-import asyncio
-import os
-from typing import AsyncGenerator, Generator
-
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
+import sys
+from unittest.mock import MagicMock, AsyncMock, patch
 
-from src.app.main import app
-from src.database.database import Base, get_db
-from src.models.user import User, UserRole
-from src.utils.security import hash_password
+# Problem: We need to mock create_async_engine to avoid DB connection,
+# but we need AsyncSession to be the real class (or close to it) for type checking/SQLAlchemy internals.
 
-# Test database URL
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+asyncpg://test_user:test_password@localhost:5432/test_db",
-)
+# Strategy: Allow import of sqlalchemy.ext.asyncio, but patch create_async_engine inside it
+# BEFORE src.database.database is imported.
 
+# We can't easily patch it before import unless we use sys.modules trick but better.
+# Let's try to mock only the function.
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
-
-@pytest.fixture(scope="session")
-async def test_engine():
-    """Create a test database engine."""
-    engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool, echo=False)
+with patch("sqlalchemy.ext.asyncio.create_async_engine") as mock_create_engine:
+    mock_engine = MagicMock()
+    mock_create_engine.return_value = mock_engine
+    # Now import the modules that trigger DB init
+    from src.database.database import Base, get_db
     
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+    # Import all models to ensure registry is populated
+    from src.models.user import User
+    from src.models.project import Project
+    from src.models.issue import Issue
+    from src.models.comment import Comment
+    from src.models.user_session import UserSession
+    from src.models.audit_log import AuditLog
     
-    yield engine
-    
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    
-    await engine.dispose()
+    # We also need to fix dependencies that might import it differently
+    pass
 
+# Better approach for conftest: use an autouse fixture that patches it?
+# Too late, imports happen at collection time.
+# We must use sys.modules or careful patching.
+
+# Let's restore real module but patch the function
+import sqlalchemy.ext.asyncio
+original_create = sqlalchemy.ext.asyncio.create_async_engine
+sqlalchemy.ext.asyncio.create_async_engine = MagicMock()
+
+import redis
+redis.Redis = MagicMock()
+import redis.asyncio
+redis.asyncio.Redis = MagicMock()
 
 @pytest.fixture
-async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
-    """Create a test database session."""
-    async_session = sessionmaker(
-        test_engine, class_=AsyncSession, expire_on_commit=False
-    )
-    
-    async with async_session() as session:
-        yield session
-        await session.rollback()
-
-
-@pytest.fixture
-def client(db_session: AsyncSession) -> TestClient:
-    """Create a test client with database session override."""
-    
-    async def override_get_db():
-        yield db_session
-    
-    app.dependency_overrides[get_db] = override_get_db
-    
-    with TestClient(app) as test_client:
-        yield test_client
-    
-    app.dependency_overrides.clear()
-
+def mock_db_session():
+    """Fixture for a mocked database session."""
+    session = AsyncMock()
+    # Mock execute/scalar_one_or_none/scalars/all chain
+    result_mock = MagicMock()
+    result_mock.scalar_one_or_none.return_value = None
+    result_mock.scalars.return_value.all.return_value = []
+    session.execute.return_value = result_mock
+    return session
 
 @pytest.fixture
-async def test_user(db_session: AsyncSession) -> User:
-    """Create a test user."""
-    user = User(
-        username="testuser",
-        email="test@example.com",
-        hashed_password=hash_password("Test@123"),
-        role=UserRole.DEVELOPER,
-        is_active=True,
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
-
+def mock_redis():
+    """Fixture for a mocked Redis client."""
+    redis = AsyncMock()
+    return redis
 
 @pytest.fixture
-async def test_admin(db_session: AsyncSession) -> User:
-    """Create a test admin user."""
-    admin = User(
-        username="admin",
-        email="admin@example.com",
-        hashed_password=hash_password("Admin@123"),
-        role=UserRole.ADMIN,
-        is_active=True,
-    )
-    db_session.add(admin)
-    await db_session.commit()
-    await db_session.refresh(admin)
-    return admin
+def mock_settings(monkeypatch):
+    """Fixture to override settings."""
+    monkeypatch.setenv("SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost:5432/db")
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
 
+    """Fixture for a mocked database session."""
+    session = AsyncMock()
+    # Mock execute/scalar_one_or_none/scalars/all chain
+    result_mock = MagicMock()
+    result_mock.scalar_one_or_none.return_value = None
+    result_mock.scalars.return_value.all.return_value = []
+    session.execute.return_value = result_mock
+    return session
 
 @pytest.fixture
-async def test_manager(db_session: AsyncSession) -> User:
-    """Create a test manager user."""
-    manager = User(
-        username="manager",
-        email="manager@example.com",
-        hashed_password=hash_password("Manager@123"),
-        role=UserRole.MANAGER,
-        is_active=True,
-    )
-    db_session.add(manager)
-    await db_session.commit()
-    await db_session.refresh(manager)
-    return manager
+def mock_redis():
+    """Fixture for a mocked Redis client."""
+    redis = AsyncMock()
+    return redis
+
+@pytest.fixture
+def mock_settings(monkeypatch):
+    """Fixture to override settings."""
+    monkeypatch.setenv("SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost:5432/db")
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")

@@ -64,7 +64,10 @@ class Settings(BaseSettings):
     login_rate_limit_per_minute: int = Field(default=5, alias="LOGIN_RATE_LIMIT_PER_MINUTE")
 
     # CORS
-    cors_origins: list[str] = Field(default=["http://localhost:3000"], alias="CORS_ORIGINS")
+    cors_origins_str: str = Field(
+        default="http://localhost:3000",
+        alias="CORS_ORIGINS",
+    )
     cors_allow_credentials: bool = Field(default=True, alias="CORS_ALLOW_CREDENTIALS")
 
     # Pagination
@@ -74,15 +77,21 @@ class Settings(BaseSettings):
     # File Upload
     max_upload_size_mb: int = Field(default=1, alias="MAX_UPLOAD_SIZE_MB")
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
-        """Parse CORS origins from comma-separated string or list."""
-        if isinstance(v, str):
-            if not v or v.strip() == "":
-                return ["http://localhost:3000"]
-            return [origin.strip() for origin in v.split(",")]
-        return v
+    @property
+    def cors_origins(self) -> list[str]:
+        """Get CORS origins as a list."""
+        if not self.cors_origins_str or self.cors_origins_str.strip() == "":
+            return ["http://localhost:3000"]
+        # Try JSON parse first
+        import json
+        try:
+            parsed = json.loads(self.cors_origins_str)
+            if isinstance(parsed, list):
+                return parsed
+        except (json.JSONDecodeError, ValueError, TypeError):
+            pass
+        # Comma-separated fallback
+        return [origin.strip() for origin in self.cors_origins_str.split(",") if origin.strip()]
 
     @field_validator("environment")
     @classmethod
