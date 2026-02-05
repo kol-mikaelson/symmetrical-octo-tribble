@@ -42,10 +42,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
-            echo "image_tag=${{ github.event.inputs.image_tag || github.sha }}" >> $GITHUB_OUTPUT
+            echo "image_tag=${{ github.event.inputs.image_tag || 'latest' }}" >> $GITHUB_OUTPUT
           else
             echo "environment=staging" >> $GITHUB_OUTPUT
-            echo "image_tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "image_tag=latest" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up kubectl
@@ -57,7 +57,8 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-          kubectl config use-context ${{ steps.vars.outputs.environment }}
+          # Use the current context from the provided config file
+          kubectl config use-context $(kubectl config current-context)
 
       - name: Create namespace if not exists
         run: |
@@ -141,6 +142,5 @@ jobs:
           text: |
             Deployment to ${{ steps.vars.outputs.environment }} ${{ job.status }}
             Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.image_tag }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
