@@ -1,7 +1,7 @@
 # FastAPI and ASGI Server
 fastapi>=0.115.0
 uvicorn[standard]==0.24.0
-starlette==0.41.2
+starlette>=0.47.2
 
 # Database
 sqlalchemy==2.0.23
@@ -14,10 +14,9 @@ pydantic-settings==2.1.0
 email-validator==2.1.0
 
 # Authentication & Security
-python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.1
-pyjwt==2.8.0
+pyjwt[crypto]==2.8.0
 python-multipart==0.0.22
 
 # Redis
