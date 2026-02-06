@@ -1,4 +1,4 @@
-# Bug Reporting System API
+# Bug Reporting System API - AI4Bharat Submission by Purandhar Reddy
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)](https://fastapi.tiangolo.com/)
